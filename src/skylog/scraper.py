@@ -14,23 +14,46 @@ JPL_API_LIMIT = 100
 JPL_API_PARAMS = {
                     'limit' : JPL_API_LIMIT
                     }
+JPL_API_TIMEOUT = 15
 
 SAVE_FILE_PATH = "output_data/jpl_data.json"
 JSON_INDENT = 4
+
 
 ### OPTIONS END ###
 
 import requests
 import json
 
+### WE ARE HERE ###
+def saveJPLData() :
+    pass
+
 def getJPLData() :
-    response = requests.get(JPL_API_URL_BASE, params=JPL_API_PARAMS)
+    try :
+        response = requests.get(
+            JPL_API_URL_BASE, 
+            params=JPL_API_PARAMS,
+            timeout=JPL_API_TIMEOUT
+        )
 
-    response_json_data = response.json()
+        response.raise_for_status()
 
-    with open(SAVE_FILE_PATH, "w") as file :
-        json.dump(response_json_data, file, indent=JSON_INDENT)
-    
+        response_json_data = response.json()
+
+        with open(SAVE_FILE_PATH, "w") as file :
+            json.dump(response_json_data, file, indent=JSON_INDENT)
+
+        print(f"Data has been retrived and saved at file : {SAVE_FILE_PATH}")
+
+    except requests.exceptions.RequestException as e :
+        print(f"API request failed, error : {e}")
+
+    except requests.exceptions.JSONDecodeError as e :
+        print(f"JSON Parsing has failed, error : {e}")
+
+    except OSError as e :
+        print(f"Error in file operation, error : {e}")
 
 def main() :
     print ("Hello, this is skylog")
